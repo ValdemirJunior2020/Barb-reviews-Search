@@ -9,8 +9,6 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.11.0",
     "bootstrap": "^5.3.7",
-    "jspdf": "^2.5.2",
-    "jspdf-autotable": "^3.8.4",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-scripts": "5.0.1",
