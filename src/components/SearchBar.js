@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 
 const QUICK = [
   { label: "Headset", term: "headset" },
@@ -24,7 +24,7 @@ export default function SearchBar({
           <label className="form-label fw-semibold">Search text</label>
           <input
             className="form-control"
-            placeholder='e.g., "headset", "connection", agent name…'
+            placeholder='e.g., "headset", "connection", agent nameâ€¦'
             value={query}
             onChange={(e) => onQuery(e.target.value)}
           />

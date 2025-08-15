@@ -1,4 +1,4 @@
-﻿import axios from "axios";
+import axios from "axios";
 
 const API_KEY = (process.env.REACT_APP_SHEETS_API_KEY || "").trim();
 const SPREADSHEET_ID = process.env.REACT_APP_SPREADSHEET_ID;

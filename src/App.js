@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { fetchSheetRows } from "./services/sheets";
 import SearchBar from "./components/SearchBar";
 import ResultsTable from "./components/ResultsTable";
@@ -108,7 +108,7 @@ export default function App() {
     const today = new Date().toLocaleString();
 
     doc.setFontSize(16);
-    doc.text(`Reviews Search – "${termLabel}"`, 14, 18);
+    doc.text(`Reviews Search â€“ "${termLabel}"`, 14, 18);
     doc.setFontSize(10);
     doc.text(`Generated: ${today}`, 14, 24);
 
@@ -132,7 +132,7 @@ export default function App() {
       y += 8;
       if (y > 270) { doc.addPage(); y = 20; }
       doc.setFontSize(13);
-      doc.text(`${c} — ${rowsForCenter.length} match(es)`, 14, y);
+      doc.text(`${c} â€” ${rowsForCenter.length} match(es)`, 14, y);
 
       const headCols = [
         ...(hTimestamp ? [hTimestamp] : []),
@@ -168,7 +168,7 @@ export default function App() {
 
   return (
     <div className="container py-4">
-      <h1 className="h3 mb-3">Reviews Search (Google Sheets – {process.env.REACT_APP_SHEET_NAME})</h1>
+      <h1 className="h3 mb-3">Reviews Search (Google Sheets â€“ {process.env.REACT_APP_SHEET_NAME})</h1>
 
       <div className="card shadow-sm mb-3">
         <div className="card-body">
@@ -186,7 +186,7 @@ export default function App() {
           />
 
           {error && <div className="alert alert-danger">{error}</div>}
-          {loading && <div className="text-muted">Loading sheet…</div>}
+          {loading && <div className="text-muted">Loading sheetâ€¦</div>}
 
           {!loading && !error && (
             <>
