@@ -1,6 +1,6 @@
-import React from "react";
+﻿import React from "react";
 
-function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\\\$&"); }
 function highlight(text, q) {
   if (!q) return text;
   const re = new RegExp(`(${escapeRegex(q)})`, "ig");

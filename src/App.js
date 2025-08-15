@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 import { fetchSheetRows } from "./services/sheets";
 import SearchBar from "./components/SearchBar";
 import ResultsTable from "./components/ResultsTable";
@@ -6,7 +6,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 const CALL_CENTER_HEADERS = ["Call Center","call center","Center","CallCenter"];
-const DEFAULT_ISSUE_TERMS = ["headset", "connection"]; // add more terms if you want
+const DEFAULT_ISSUE_TERMS = ["headset", "connection"]; // add "mic","audio" if you want
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -107,13 +107,11 @@ export default function App() {
     const doc = new jsPDF({ compress: true });
     const today = new Date().toLocaleString();
 
-    // Title
     doc.setFontSize(16);
     doc.text(`Reviews Search – "${termLabel}"`, 14, 18);
     doc.setFontSize(10);
     doc.text(`Generated: ${today}`, 14, 24);
 
-    // Summary table
     const summaryHead = [["Call Center", `Mentions of "${termLabel}"`]];
     const summaryRows = counts.map(([c, n]) => [c, String(n)]);
     autoTable(doc, {
@@ -125,14 +123,12 @@ export default function App() {
       theme: "striped",
     });
 
-    // Details grouped by center
     let y = (doc.lastAutoTable && doc.lastAutoTable.finalY) || 30;
 
     counts.forEach(([c]) => {
       const rowsForCenter = filtered.filter(r => String(r[callCenterField] ?? "").trim() === c);
       if (!rowsForCenter.length) return;
 
-      // Section header
       y += 8;
       if (y > 270) { doc.addPage(); y = 20; }
       doc.setFontSize(13);
@@ -160,7 +156,7 @@ export default function App() {
         styles: { fontSize: 8, cellPadding: 2, overflow: "linebreak" },
         headStyles: { fillColor: [200, 200, 200] },
         theme: "striped",
-        columnStyles: { 2: { cellWidth: 110 } }, // widen "Concern" col if present
+        columnStyles: { 2: { cellWidth: 110 } },
       });
 
       y = (doc.lastAutoTable && doc.lastAutoTable.finalY) || y;
@@ -206,7 +202,7 @@ export default function App() {
                 headers={headers}
                 query={activeTerms.join(" | ")}
                 page={page}
-                perPage={25}
+                perPage={perPage}
                 onPage={setPage}
               />
             </>
