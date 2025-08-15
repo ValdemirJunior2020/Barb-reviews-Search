@@ -33,7 +33,7 @@ export default function ResultsTable({ rows, headers, query, page, perPage, onPa
 
       <div className="d-flex justify-content-between align-items-center">
         <small className="text-muted">
-          Showing {rows.length === 0 ? 0 : start + 1}â€“{Math.min(start + perPage, rows.length)} of {rows.length}
+          Showing {rows.length === 0 ? 0 : start + 1}Ã¢â‚¬â€œ{Math.min(start + perPage, rows.length)} of {rows.length}
         </small>
         <div className="btn-group">
           <button className="btn btn-outline-secondary btn-sm" disabled={page <= 1} onClick={() => onPage(1)}>&laquo;</button>

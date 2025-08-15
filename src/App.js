@@ -6,7 +6,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 const CALL_CENTER_HEADERS = ["Call Center","call center","Center","CallCenter"];
-const DEFAULT_ISSUE_TERMS = ["headset", "connection"]; // add "mic","audio" if you want
+const DEFAULT_ISSUE_TERMS = ["headset", "connection"]; // add more if you want
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -20,6 +20,7 @@ export default function App() {
   const [page, setPage] = useState(1);
   const perPage = 25;
 
+  // load sheet
   useEffect(() => {
     (async () => {
       try {
@@ -35,14 +36,21 @@ export default function App() {
     })();
   }, []);
 
+  // robustly detect call center column
   const callCenterField = useMemo(() => {
     const setHdrs = new Set(headers.map(h => h.toLowerCase()));
     for (const h of CALL_CENTER_HEADERS) {
-      if (setHdrs.has(h.toLowerCase())) return headers.find(x => x.toLowerCase() === h.toLowerCase());
+      if (setHdrs.has(h.toLowerCase())) {
+        return headers.find(x => x.toLowerCase() === h.toLowerCase());
+      }
     }
-    return headers.find(h => h.toLowerCase().includes("call") && h.toLowerCase().includes("center")) || headers[0];
+    return (
+      headers.find(h => h.toLowerCase().includes("call") && h.toLowerCase().includes("center")) ||
+      headers[0]
+    );
   }, [headers]);
 
+  // unique list of centers
   const centers = useMemo(() => {
     const s = new Set();
     allRows.forEach(r => {
@@ -52,6 +60,7 @@ export default function App() {
     return Array.from(s).sort();
   }, [allRows, callCenterField]);
 
+  // active terms from query or default issues
   const activeTerms = useMemo(() => {
     if (query.trim()) {
       const parts = query.toLowerCase().trim().split(/[| ]+/).filter(Boolean);
@@ -60,20 +69,20 @@ export default function App() {
     return issuesOnly ? DEFAULT_ISSUE_TERMS : [];
   }, [query, issuesOnly]);
 
-  const rowMatches = (row) => {
-    if (!activeTerms.length) return true;
-    return headers.some((h) => {
-      const val = String(row[h] ?? "").toLowerCase();
-      return activeTerms.some((t) => val.includes(t));
-    });
-  };
-
+  // filtered rows (INLINE logic to satisfy exhaustive-deps)
   const filtered = useMemo(() => {
-    let r = allRows.filter(rowMatches);
-    if (center) r = r.filter(row => String(row[callCenterField] ?? "").trim() === center);
-    return r;
+    const terms = activeTerms;
+    return allRows.filter((row) => {
+      if (center && String(row[callCenterField] ?? "").trim() !== center) return false;
+      if (!terms.length) return true;
+      return headers.some((h) => {
+        const val = String(row[h] ?? "").toLowerCase();
+        return terms.some((t) => val.includes(t));
+      });
+    });
   }, [allRows, activeTerms, center, callCenterField, headers]);
 
+  // counts per center for current filter
   const counts = useMemo(() => {
     const map = new Map();
     filtered.forEach(r => {
@@ -86,6 +95,7 @@ export default function App() {
   const handleQuick = (term) => { setQuery(term); setIssuesOnly(false); setPage(1); };
   const handleClear = () => { setQuery(""); setIssuesOnly(false); setCenter(""); setPage(1); };
 
+  // header picking helpers for PDF
   function pickHeader(nameHints) {
     const lower = headers.map(h => [h, h.toLowerCase()]);
     for (const hint of nameHints) {
@@ -102,16 +112,19 @@ export default function App() {
   const hType = pickHeader(["type of feedback","feedback"]);
   const hItin = pickHeader(["Itinerary #","Itinerary"]);
 
+  // PDF export
   const handleExport = () => {
     const termLabel = activeTerms.length ? activeTerms.join(" OR ") : "(all rows)";
     const doc = new jsPDF({ compress: true });
     const today = new Date().toLocaleString();
 
+    // Title
     doc.setFontSize(16);
-    doc.text(`Reviews Search â€“ "${termLabel}"`, 14, 18);
+    doc.text(`Reviews Search - "${termLabel}"`, 14, 18);
     doc.setFontSize(10);
     doc.text(`Generated: ${today}`, 14, 24);
 
+    // Summary table
     const summaryHead = [["Call Center", `Mentions of "${termLabel}"`]];
     const summaryRows = counts.map(([c, n]) => [c, String(n)]);
     autoTable(doc, {
@@ -123,16 +136,18 @@ export default function App() {
       theme: "striped",
     });
 
+    // Details by center
     let y = (doc.lastAutoTable && doc.lastAutoTable.finalY) || 30;
 
     counts.forEach(([c]) => {
       const rowsForCenter = filtered.filter(r => String(r[callCenterField] ?? "").trim() === c);
       if (!rowsForCenter.length) return;
 
+      // section header
       y += 8;
       if (y > 270) { doc.addPage(); y = 20; }
       doc.setFontSize(13);
-      doc.text(`${c} â€” ${rowsForCenter.length} match(es)`, 14, y);
+      doc.text(`${c} - ${rowsForCenter.length} match(es)`, 14, y);
 
       const headCols = [
         ...(hTimestamp ? [hTimestamp] : []),
@@ -156,7 +171,7 @@ export default function App() {
         styles: { fontSize: 8, cellPadding: 2, overflow: "linebreak" },
         headStyles: { fillColor: [200, 200, 200] },
         theme: "striped",
-        columnStyles: { 2: { cellWidth: 110 } },
+        columnStyles: { 2: { cellWidth: 110 } }, // widen "Concern" if present
       });
 
       y = (doc.lastAutoTable && doc.lastAutoTable.finalY) || y;
@@ -168,7 +183,9 @@ export default function App() {
 
   return (
     <div className="container py-4">
-      <h1 className="h3 mb-3">Reviews Search (Google Sheets â€“ {process.env.REACT_APP_SHEET_NAME})</h1>
+      <h1 className="h3 mb-3">
+        Reviews Search (Google Sheets - {process.env.REACT_APP_SHEET_NAME})
+      </h1>
 
       <div className="card shadow-sm mb-3">
         <div className="card-body">
@@ -186,7 +203,7 @@ export default function App() {
           />
 
           {error && <div className="alert alert-danger">{error}</div>}
-          {loading && <div className="text-muted">Loading sheetâ€¦</div>}
+          {loading && <div className="text-muted">Loading sheet...</div>}
 
           {!loading && !error && (
             <>

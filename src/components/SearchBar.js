@@ -24,7 +24,7 @@ export default function SearchBar({
           <label className="form-label fw-semibold">Search text</label>
           <input
             className="form-control"
-            placeholder='e.g., "headset", "connection", agent nameâ€¦'
+            placeholder='e.g., "headset", "connection", agent nameÃ¢â‚¬Â¦'
             value={query}
             onChange={(e) => onQuery(e.target.value)}
           />
